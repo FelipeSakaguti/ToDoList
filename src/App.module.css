@@ -1,0 +1,9 @@
+.main {
+    max-width: 46rem;
+    margin: -1.75rem auto;
+    padding: 0 1rem;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+}

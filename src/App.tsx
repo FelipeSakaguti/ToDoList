@@ -1,6 +1,9 @@
 import { useState } from 'react'
 
 import { Header } from './Components/Header';
+import { Main } from './Components/Main';
+
+import styles from './App.module.css';
 import './global.css';
 
 export function App() {
@@ -8,7 +11,9 @@ export function App() {
   return (
     <>
       <Header/>
-      <h1>Hello World</h1>
+      <main className={styles.main} >
+        <Main />
+      </main>
     </>
 
   )
