@@ -59,6 +59,7 @@
     justify-content: space-between;
 
     margin-top: 4rem;
+    padding-bottom: 0.75rem;
 }
 
 .createdHeader {
@@ -99,4 +100,32 @@
     line-height: 1.6;
 }
 
+.noTaskContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
+    border-radius: 8px;
+    line-height: 1.6;
+    border-top: 1px solid var(--gray-400);
+
+    margin-top: 1.5rem;
+    padding: 0 0 4rem 0;
+}
+
+.noTaskContainer img{
+    margin-top: 4rem;
+    margin-bottom: 1rem;
+}
+
+.noTaskContainer strong{
+    color: var(--gray-300);
+    font-weight: bold;
+    line-height: 1.4rem;
+}
+
+.noTaskContainer span{
+    color: var(--gray-300);
+    font-weight: regular;
+    line-height: 1.4rem;
+}

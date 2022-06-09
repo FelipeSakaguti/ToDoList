@@ -1,44 +1,103 @@
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, InvalidEvent, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { PlusCircle } from 'phosphor-react'
 import { Task } from './Task';
 import styles from './Main.module.css';
+import clipboardSvg from '../assets/clipboard.svg';
 
-const tasksTasks = [
-    {
-        id: uuidv4(),
-        title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-        isComplete: false,
-    },
-    {
-        id: uuidv4(),
-        title: 'Terminar esse paranaue',
-        isComplete: true,
-    },
-    {
-        id: uuidv4(),
-        title: 'Fazer um front pica das galaxias, zica dos roles, ticaratica dos tiquereteudes, piponhos picanhas piradas!',
-        isComplete: false,
-    },
-]
+interface Tasks{
+    id: string;
+    title: string;
+    isComplete: boolean;
+}
 
 export function Main(){
-    const [tasks, setTasks] = useState(['1','2','3']);
+    const [newTask, setNewTask] = useState('');
+    const [tasks, setTasks] = useState<Tasks[]>([])
+
+    const [totalTask, setTotalTask] = useState(0);
+    const [completedTasks, setCompletedTasks] = useState(0);
+
+    // useEffect(()=> {
+    //     const totalCompletedTasks = tasks.reduce( ( acc, task) => {
+    //         if(task.isComplete){
+    //             return (acc + 1)
+    //         } else {
+    //             return acc
+    //         }
+    //     }, 0);
+
+    //     console.log(totalCompletedTasks)
+    //     setCompletedTasks(totalCompletedTasks)
+    // }, tasks)
+
+    function handleNewTask(event: ChangeEvent<HTMLTextAreaElement>) {
+        event.target.setCustomValidity('');
+        setNewTask(event.target.value);
+    };
+
+    function handleNewTaskInvalid(event: InvalidEvent<HTMLTextAreaElement>) {
+        event.target.setCustomValidity('Esse campo é obrigatório')
+    };
+
+    function handleCreateNewTask(event: FormEvent){
+        event.preventDefault();
+
+        setTasks([...tasks, {
+            id: uuidv4(),
+            title: newTask,
+            isComplete: false
+        }])
+        setNewTask('');
+        setTotalTask(totalTask + 1)
+    };
+
+    function completeTask(id: string): void {
+        let sumCompletedTask = 0
+        const tasksWithCompletedTask = tasks.map(task => {
+            if( task.id === id ){
+                sumCompletedTask = task.isComplete ? -1 : 1;
+                return({
+                    id: task.id,
+                    title: task.title,
+                    isComplete: !task.isComplete
+                });
+            }else{
+                return task
+            }
+        });
+        
+        setCompletedTasks(completedTasks + sumCompletedTask);
+        setTasks(tasksWithCompletedTask);
+    };
+
+    function deleteTask(id: string){
+        let sumCompletedTask = 0
+        const taskListWithoutDeleted = tasks.filter(task => {
+            if(task.isComplete && task.id === id){
+                sumCompletedTask = 1
+            }
+            return task.id !== id
+        })
+        setTasks(taskListWithoutDeleted);
+        setCompletedTasks(completedTasks - sumCompletedTask);
+        setTotalTask(totalTask - 1)
+    };
 
     return(
         <div>
-            <form onSubmit={()=>{}} className={styles.toDoForm} >
+            <form onSubmit={handleCreateNewTask} className={styles.toDoForm} >
                 <textarea
                     name="task"
                     placeholder="Adicione uma tarefa"
-                    // value={newCommentText}
-                    // onChange={handleNewCommentChange}
-                    // onInvalid={handleNewCommentInvalid}
+                    value={newTask}
+                    onChange={handleNewTask}
+                    onInvalid={handleNewTaskInvalid}
                     required
                 />
 
-                <button type='submit'>
+                <button type='submit' >
                     <span>Criar <PlusCircle /></span>
                 </button>
                 
@@ -46,19 +105,34 @@ export function Main(){
             <div className={styles.taskHeader}>
                 <div className={styles.createdHeader}>
                     <strong>Tarefas criadas</strong>
-                    <span>5</span>
+                    <span>{String(totalTask)}</span>
                 </div>
                 <div className={styles.concludedHeader}>
                     <strong>Concluídas</strong>
-                    <span>2 de 5</span>
+                    <span>{String(completedTasks)} de {String(totalTask)}</span>
                 </div>
             </div>
 
-            {tasks.map( content => {
-                return(
-                    <Task id={content} />
-                )
-            })}
+            { totalTask === 0 ? 
+                <div className={styles.noTaskContainer} >
+                    <img src={clipboardSvg} alt="ClipBoard" />
+                    <strong>Você ainda não tem tarefas cadastradas</strong>
+                    <span>Crie tarefas e organize seus itens a fazer</span>
+                </div>
+                :
+                tasks.map( task => {
+                    return(
+                        <Task
+                            key={task.id}
+                            id={task.id}
+                            title={task.title}
+                            isComplete={task.isComplete}
+                            onCompleteTask={completeTask}
+                            onDeleteTask={deleteTask}
+                        />
+                    )
+                })
+            }
 
         </div>
     )
